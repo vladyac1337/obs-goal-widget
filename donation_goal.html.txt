@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Donation Goal</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: rgba(0, 0, 0, 0); /* Прозрачный фон */
+            font-family: 'Arial', sans-serif;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+        .goal-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .goal-bar {
+            width: 80%;
+            height: 30px;
+            background-color: #333; /* Цвет фона полоски */
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .goal-progress {
+            height: 100%;
+            background-color: #5f5; /* Цвет заполнения */
+            width: 0%;
+            transition: width 1s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .goal-text {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="goal-container">
+        <div class="goal-bar">
+            <div class="goal-progress" id="progress-bar">
+                <div class="goal-text" id="progress-text"></div>
+            </div>
+        </div>
+        <div class="goal-text">Собрано: <span id="current-amount">0</span> / <span id="goal-amount">0</span> руб.</div>
+    </div>
+
+    <script>
+        // ВСТАВЬ СЮДА СВОЙ ID ТАБЛИЦЫ!
+        const spreadsheetId = '1Y8TVNBHC7KToRdQGbqCxNAa2pdwyXttEENO94MRTwoc';
+        // Указываем, откуда брать данные (A1 - текущая сумма, B1 - цель)
+        const range = 'A1:B1';
+
+        // Функция для обновления данных из таблицы
+        function updateGoal() {
+            // Формируем URL для запроса к Google Sheets API
+            const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&headers=0&range=${range}`;
+
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // Парсим нестандартный ответ от Google
+                    const json = JSON.parse(data.substring(47).slice(0, -2));
+                    if (json.table.rows.length > 0) {
+                        const cells = json.table.rows[0].c;
+                        const current = cells[0] ? cells[0].v : 0; // Значение из A1
+                        const goal = cells[1] ? cells[1].v : 1;    // Значение из B1
+
+                        // Обновляем текст
+                        document.getElementById('current-amount').textContent = current;
+                        document.getElementById('goal-amount').textContent = goal;
+
+                        // Рассчитываем и обновляем полоску
+                        const percentage = (current / goal) * 100;
+                        const progressBar = document.getElementById('progress-bar');
+                        progressBar.style.width = Math.min(percentage, 100) + '%';
+                        document.getElementById('progress-text').textContent = Math.round(percentage) + '%';
+                    }
+                })
+                .catch(error => console.error('Ошибка загрузки данных:', error));
+        }
+
+        // Обновляем данные сразу при загрузке и каждые 30 секунд
+        updateGoal();
+        setInterval(updateGoal, 30000); // 30000 мс = 30 секунд
+    </script>
+</body>
+</html>
