@@ -2,82 +2,123 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Donation Goal</title>
+    <title>$PENGU Goal</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            background: rgba(0, 0, 0, 0); /* Прозрачный фон */
+            padding: 20px;
+            background: rgba(0, 0, 0, 0); /* Прозрачный фон для OBS */
             font-family: 'Arial', sans-serif;
             color: white;
-            text-shadow: 1px 1px 2px black;
+            text-shadow: 2px 2px 4px #000; /* Чёрная обводка для текста */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .goal-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #a0e7e5; /* Ледяной/пингвиний цвет */
+            text-align: center;
         }
         .goal-container {
             width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
         .goal-bar {
-            width: 80%;
-            height: 30px;
-            background-color: #333; /* Цвет фона полоски */
-            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            height: 40px;
+            background-color: #333333; /* Цвет фона полоски */
+            border-radius: 20px;
             overflow: hidden;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #a0e7e5;
+            box-shadow: 0 0 10px rgba(160, 231, 229, 0.5);
         }
         .goal-progress {
             height: 100%;
-            background-color: #5f5; /* Цвет заполнения */
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%); /* Градиент синего */
             width: 0%;
-            transition: width 1s ease-in-out;
+            transition: width 1.5s ease-in-out;
             display: flex;
             align-items: center;
             justify-content: flex-end;
+            font-weight: bold;
         }
         .goal-text {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            padding: 0 10px;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .goal-amount {
+            font-size: 20px;
+            color: #4facfe;
+            font-weight: 800;
+        }
+        .goal-target {
+            font-size: 16px;
+            color: #a0e7e5;
+        }
+        .goal-role {
+            font-size: 16px;
+            font-style: italic;
+            margin-top: 10px;
+            color: #00f2fe;
+            text-align: center;
         }
     </style>
 </head>
 <body>
+    <div class="goal-title">Pengu I Role Unlock</div>
+    
     <div class="goal-container">
         <div class="goal-bar">
             <div class="goal-progress" id="progress-bar">
                 <div class="goal-text" id="progress-text"></div>
             </div>
         </div>
-        <div class="goal-text">Собрано: <span id="current-amount">0</span> / <span id="goal-amount">0</span> руб.</div>
+        
+        <div class="goal-text">
+            <span class="goal-amount" id="current-amount">0</span> / 
+            <span class="goal-target" id="goal-amount">88,888</span> $PENGU
+        </div>
+        
+        <div class="goal-role">Goal: Become Pengu I</div>
     </div>
 
     <script>
         // ВСТАВЬ СЮДА СВОЙ ID ТАБЛИЦЫ!
         const spreadsheetId = '1Y8TVNBHC7KToRdQGbqCxNAa2pdwyXttEENO94MRTwoc';
-        // Указываем, откуда брать данные (A1 - текущая сумма, B1 - цель)
-        const range = 'A1:B1';
+        // Указываем, откуда брать данные (A1 - текущее количество PENGU)
+        const range = 'A1:A1'; // Просто одна ячейка
 
         // Функция для обновления данных из таблицы
         function updateGoal() {
-            // Формируем URL для запроса к Google Sheets API
             const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&headers=0&range=${range}`;
 
             fetch(url)
                 .then(response => response.text())
                 .then(data => {
-                    // Парсим нестандартный ответ от Google
                     const json = JSON.parse(data.substring(47).slice(0, -2));
                     if (json.table.rows.length > 0) {
                         const cells = json.table.rows[0].c;
                         const current = cells[0] ? cells[0].v : 0; // Значение из A1
-                        const goal = cells[1] ? cells[1].v : 1;    // Значение из B1
+                        const goal = 88888; // Фиксированная цель - 88,888 PENGU
+
+                        // Форматируем числа с разделителями
+                        const formattedCurrent = current.toLocaleString();
+                        const formattedGoal = goal.toLocaleString();
 
                         // Обновляем текст
-                        document.getElementById('current-amount').textContent = current;
-                        document.getElementById('goal-amount').textContent = goal;
+                        document.getElementById('current-amount').textContent = formattedCurrent;
+                        document.getElementById('goal-amount').textContent = formattedGoal;
 
                         // Рассчитываем и обновляем полоску
                         const percentage = (current / goal) * 100;
@@ -91,7 +132,7 @@
 
         // Обновляем данные сразу при загрузке и каждые 30 секунд
         updateGoal();
-        setInterval(updateGoal, 30000); // 30000 мс = 30 секунд
+        setInterval(updateGoal, 30000);
     </script>
 </body>
 </html>
